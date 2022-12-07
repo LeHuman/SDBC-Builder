@@ -1,35 +1,58 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+    max-width: 1280px;
+    min-width: 960px;
+    min-height: 620px;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 2rem;
 
-  font-weight: normal;
+    font-weight: normal;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
+#navRow {
+    position: absolute;
+    margin: 0 auto;
+    width: 90%;
+    bottom: 1rem;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+#logText {
+    scrollbar-width: thin;
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+.selectorCont {
+    height: 16vh;
+    overflow-y: scroll;
+    -ms-overflow-style: auto;
+    scrollbar-width: thin;
+}
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+.selectorCont::-webkit-scrollbar {
+    display: auto;
+}
+
+select option {
+    color: #757575;
+    background-color: #262626;
+}
+
+.MDBRow {
+    margin-top: 1rem;
+}
+
+.MDBBtn {
+    padding: 7pt;
+    margin-inline-end: 1rem;
+}
+
+.navBtn {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.padTop {
+    margin-top: 1rem;
 }
