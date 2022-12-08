@@ -45,7 +45,7 @@
                 </MDBRow>
                 <MDBRow class="MDBRow">
                     <MDBCol>
-                        <MDBTooltip v-model="tooltip0" :arrow="(true)" :disabled="(activeMsg != null)">
+                        <MDBTooltip v-model="tooltip0" :arrow="(true)" :disabled="(activeMsg != null)" direction="top">
                             <template #reference>
                                 <MDBRow class="g-3">
                                     <MDBCol col="50">
@@ -79,7 +79,7 @@
                         </MDBTooltip>
                     </MDBCol>
                     <MDBCol>
-                        <MDBTooltip v-model="tooltip1" :arrow="(true)" :disabled="(activeSig != null)">
+                        <MDBTooltip v-model="tooltip1" :arrow="(true)" :disabled="(activeSig != null)" direction="top">
                             <template #reference>
                                 <MDBRow class="g-3">
                                     <MDBCol col="50">
@@ -149,50 +149,65 @@
                         </MDBCol>
                     </MDBCol>
                     <MDBCol>
-                        <MDBRow class="g-3">
-                            <MDBCol col="50">
-                                <MDBInput v-bind:is-valid="validName(activeFormat?.name)"
-                                    v-bind:is-validated="!validName(activeFormat?.name)" required
-                                    :invalidFeedback="(helpStr_ID)" type="text" label="Format ID"
-                                    v-bind:model-value="activeFormat?.name"
-                                    @update:model-value="val => activeFormat ? activeFormat.name = val : false" />
-                            </MDBCol>
-                            <MDBCol col="50">
-                                <MDBTextarea label="Format Description" rows="2" style="max-height: 5rem;"
-                                    v-bind:model-value="activeFormat?.desc"
-                                    @update:model-value="val => activeFormat ? activeFormat.desc = val : false" />
-                            </MDBCol>
-                            <MDBCol col="3">
-                                <MDBInput :invalidFeedback="(helpStr_Num)"
-                                    v-bind:is-valid="validNumber(activeFormat?.scale)"
-                                    v-bind:is-validated="!validNumber(activeFormat?.scale)" required type="text"
-                                    label="Scale" v-bind:model-value="activeFormat?.scale?.toString()"
-                                    @update:model-value="val => activeFormat ? activeFormat.scale = val : false" />
-                            </MDBCol>
-                            <MDBCol col="3">
-                                <MDBInput :invalidFeedback="(helpStr_Num)"
-                                    v-bind:is-valid="validNumber(activeFormat?.offset)"
-                                    v-bind:is-validated="!validNumber(activeFormat?.offset)" required type="text"
-                                    label="Offset" v-bind:model-value="activeFormat?.offset?.toString()"
-                                    @update:model-value="val => activeFormat ? activeFormat.offset = val : false" />
-                            </MDBCol>
-                            <MDBCol col="3">
-                                <MDBInput
-                                    :invalidFeedback="(validNumber(activeFormat?.min) ? helpStr_Rng : helpStr_Num)"
-                                    v-bind:is-valid="(validNumber(activeFormat?.min) && validRange(activeFormat?.min, activeFormat?.max))"
-                                    v-bind:is-validated="(!(validNumber(activeFormat?.min) && validRange(activeFormat?.min, activeFormat?.max)))"
-                                    required type="text" label="Min" v-bind:model-value="activeFormat?.min?.toString()"
-                                    @update:model-value="val => activeFormat ? activeFormat.min = val : false" />
-                            </MDBCol>
-                            <MDBCol col="3">
-                                <MDBInput
-                                    :invalidFeedback="(validNumber(activeFormat?.max) ? helpStr_Rng : helpStr_Num)"
-                                    v-bind:is-valid="(validNumber(activeFormat?.max) && validRange(activeFormat?.min, activeFormat?.max))"
-                                    v-bind:is-validated="(!(validNumber(activeFormat?.max) && validRange(activeFormat?.min, activeFormat?.max)))"
-                                    required type="text" label="Max" v-bind:model-value="activeFormat?.max?.toString()"
-                                    @update:model-value="val => activeFormat ? activeFormat.max = val : false" />
-                            </MDBCol>
-                        </MDBRow>
+                        <MDBTooltip v-model="tooltip2" :arrow="(true)" :disabled="(activeFormat != null)"
+                            direction="top">
+                            <template #reference>
+                                <MDBRow class="g-3">
+                                    <MDBCol col="50">
+                                        <MDBInput v-bind:is-valid="validName(activeFormat?.name)"
+                                            :disabled="(activeFormat === null)"
+                                            v-bind:is-validated="(!validName(activeFormat?.name) && activeFormat != null)"
+                                            required :invalidFeedback="(helpStr_ID)" type="text" label="Format ID"
+                                            v-bind:model-value="activeFormat?.name"
+                                            @update:model-value="val => activeFormat ? activeFormat.name = val : false" />
+                                    </MDBCol>
+                                    <MDBCol col="50">
+                                        <MDBTextarea label="Format Description" rows="2" style="max-height: 5rem;"
+                                            :disabled="(activeFormat === null)" v-bind:model-value="activeFormat?.desc"
+                                            @update:model-value="val => activeFormat ? activeFormat.desc = val : false" />
+                                    </MDBCol>
+                                    <MDBCol col="3">
+                                        <MDBInput :invalidFeedback="(helpStr_Num)" :disabled="(activeFormat === null)"
+                                            v-bind:is-valid="validNumber(activeFormat?.scale)"
+                                            v-bind:is-validated="(!validNumber(activeFormat?.scale) && activeFormat != null)"
+                                            required type="text" label="Scale"
+                                            v-bind:model-value="activeFormat?.scale?.toString()"
+                                            @update:model-value="val => activeFormat ? activeFormat.scale = val : false" />
+                                    </MDBCol>
+                                    <MDBCol col="3">
+                                        <MDBInput :invalidFeedback="(helpStr_Num)" :disabled="(activeFormat === null)"
+                                            v-bind:is-valid="validNumber(activeFormat?.offset)"
+                                            v-bind:is-validated="(!validNumber(activeFormat?.offset) && activeFormat != null)"
+                                            required type="text" label="Offset"
+                                            v-bind:model-value="activeFormat?.offset?.toString()"
+                                            @update:model-value="val => activeFormat ? activeFormat.offset = val : false" />
+                                    </MDBCol>
+                                    <MDBCol col="3">
+                                        <MDBInput
+                                            :invalidFeedback="(validNumber(activeFormat?.min) ? helpStr_Rng : helpStr_Num)"
+                                            :disabled="(activeFormat === null)"
+                                            v-bind:is-valid="(validNumber(activeFormat?.min) && validRange(activeFormat?.min, activeFormat?.max))"
+                                            v-bind:is-validated="((!(validNumber(activeFormat?.min) && validRange(activeFormat?.min, activeFormat?.max))) && activeFormat != null)"
+                                            required type="text" label="Min"
+                                            v-bind:model-value="activeFormat?.min?.toString()"
+                                            @update:model-value="val => activeFormat ? activeFormat.min = val : false" />
+                                    </MDBCol>
+                                    <MDBCol col="3">
+                                        <MDBInput
+                                            :invalidFeedback="(validNumber(activeFormat?.max) ? helpStr_Rng : helpStr_Num)"
+                                            :disabled="(activeFormat === null)"
+                                            v-bind:is-valid="(validNumber(activeFormat?.max) && validRange(activeFormat?.min, activeFormat?.max))"
+                                            v-bind:is-validated="((!(validNumber(activeFormat?.max) && validRange(activeFormat?.min, activeFormat?.max))) && activeFormat != null)"
+                                            required type="text" label="Max"
+                                            v-bind:model-value="activeFormat?.max?.toString()"
+                                            @update:model-value="val => activeFormat ? activeFormat.max = val : false" />
+                                    </MDBCol>
+                                </MDBRow>
+                            </template>
+                            <template #tip>
+                                Select a Format First
+                            </template>
+                        </MDBTooltip>
                     </MDBCol>
                 </MDBRow>
             </MDBTabPane>
@@ -350,10 +365,11 @@
                     <i class="fas fa-cogs fa-fw me-2"></i>Nodes
                 </MDBTabItem>
                 <MDBCol auto>
-                    <MDBBtn class="MDBBtn navBtn" @click="openFile">Open File</MDBBtn>
+                    <!-- <MDBBtn class="MDBBtn navBtn" @click="openFile">Open File</MDBBtn> -->
                     <MDBBtn class="MDBBtn navBtn" @click="saveFile">Save File</MDBBtn>
                 </MDBCol>
                 <MDBCol>
+                    <!-- <MDBInput dark placeholder="No file loaded"></MDBInput> -->
                     <MDBFile dark id="form_file" v-model="form_file" />
                 </MDBCol>
             </MDBTabNav>
@@ -423,6 +439,8 @@ const form12Input2 = ref("");
 
 const tooltip0 = ref(false);
 const tooltip1 = ref(false);
+const tooltip2 = ref(false);
+const tooltip3 = ref(false);
 </script>
 
 <script lang="ts">
@@ -435,7 +453,7 @@ class BaseType {
         this.desc = desc;
     }
     getDesc(limit: number = 32, withName: boolean = true) {
-        return `${withName ? this.name : ''}${this.desc ? ` : ${this.desc.slice(0, limit)}${this.desc.length > limit ? '...' : ''}` : ''}`
+        return `${withName ? (this.name ? this.name : '$nil') : ''}${this.desc ? ` : ${this.desc.slice(0, limit)}${this.desc.length > limit ? '...' : ''}` : ''}`;
     }
 }
 
