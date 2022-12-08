@@ -19,11 +19,16 @@
     bottom: 1rem;
 }
 
+#sigFormSel {
+    scrollbar-color: #454a4d #202324;
+}
+
 #logText {
     scrollbar-width: thin;
 }
 
 .selectorCont {
+    height: fit-content;
     max-height: 8rem;
     overflow-y: scroll;
     -ms-overflow-style: auto;

@@ -44,7 +44,6 @@
                     </MDBCol>
                 </MDBRow>
                 <MDBRow class="MDBRow">
-
                     <MDBCol>
                         <MDBTooltip v-model="tooltip0" :arrow="(true)" :disabled="(activeMsg != null)">
                             <template #reference>
@@ -91,14 +90,14 @@
                                             v-bind:model-value="activeSig?.name"
                                             @update:model-value="val => activeSig ? activeSig.name = val : false" />
                                     </MDBCol>
+                                    <!-- TODO: validation for selector -->
                                     <MDBCol col="50">
-                                        <select :style="(activeSig === null ? 'background-color: #474747' : '')"
-                                            id="sigFormSel" :disabled="(activeSig === null)" class="form-control">
-                                            <option selected>Signal Format</option>
-                                            <option value="1">One</option>
-                                            <option value="2">Two</option>
-                                            <option value="3">Three</option>
-                                        </select>
+                                        <vSelect :class="activeSig ? (activeSig?.format ? '' : 'vSelectError') : ''"
+                                            placeholder="Select a Signal Format" class="vSelect" :options="(formats)"
+                                            label="name" :disabled="(activeSig === null)"
+                                            v-bind:model-value="activeSig?.format"
+                                            @update:model-value="val => activeSig ? activeSig.format = val : false">
+                                        </vSelect>
                                     </MDBCol>
                                     <MDBCol col="50">
                                         <MDBTextarea :disabled="(activeSig === null)" type="text"
@@ -114,7 +113,6 @@
                         </MDBTooltip>
                     </MDBCol>
                 </MDBRow>
-
                 <MDBRow class="MDBRow">
                     <MDBCol auto>
                         <MDBBtn class="MDBBtn" @click="newMessage" color="primary">New Message</MDBBtn>
@@ -123,7 +121,6 @@
                         <MDBBtn class="MDBBtn" @click="deleteSignal" color="secondary">Delete Signal</MDBBtn>
                     </MDBCol>
                 </MDBRow>
-
             </MDBTabPane>
             <MDBTabPane id="tabView" tabId="ex5-2">
                 <p class="fs-1">Formats</p>
@@ -140,8 +137,8 @@
                         <div class="selectorContAlt">
                             <MDBListGroup class="selector">
                                 <MDBListGroupItem v-for="form in formats" :key="form.name"
-                                    v-bind:active="(activeFormat === form)" @click="selectFormat(form)" ripple noBorder
-                                    spacing action>
+                                    v-bind:active="(activeFormat === form)" @click="(activeFormat = form)" ripple
+                                    noBorder spacing action>
                                     {{ form.getDesc() }}
                                 </MDBListGroupItem>
                             </MDBListGroup>
@@ -180,14 +177,16 @@
                                     @update:model-value="val => activeFormat ? activeFormat.offset = val : false" />
                             </MDBCol>
                             <MDBCol col="3">
-                                <MDBInput :invalidFeedback="(helpStr_Num)"
+                                <MDBInput
+                                    :invalidFeedback="(validNumber(activeFormat?.min) ? helpStr_Rng : helpStr_Num)"
                                     v-bind:is-valid="(validNumber(activeFormat?.min) && validRange(activeFormat?.min, activeFormat?.max))"
                                     v-bind:is-validated="(!(validNumber(activeFormat?.min) && validRange(activeFormat?.min, activeFormat?.max)))"
                                     required type="text" label="Min" v-bind:model-value="activeFormat?.min?.toString()"
                                     @update:model-value="val => activeFormat ? activeFormat.min = val : false" />
                             </MDBCol>
                             <MDBCol col="3">
-                                <MDBInput :invalidFeedback="(helpStr_Num)"
+                                <MDBInput
+                                    :invalidFeedback="(validNumber(activeFormat?.max) ? helpStr_Rng : helpStr_Num)"
                                     v-bind:is-valid="(validNumber(activeFormat?.max) && validRange(activeFormat?.min, activeFormat?.max))"
                                     v-bind:is-validated="(!(validNumber(activeFormat?.max) && validRange(activeFormat?.min, activeFormat?.max)))"
                                     required type="text" label="Max" v-bind:model-value="activeFormat?.max?.toString()"
@@ -212,8 +211,8 @@
                         <div class="selectorContAlt">
                             <MDBListGroup class="selector">
                                 <MDBListGroupItem v-for="dtype in dTypes" :key="dtype.name"
-                                    v-bind:active="(activeDType === dtype)" @click="selectDType(dtype)" ripple noBorder
-                                    spacing action>
+                                    v-bind:active="(activeDType === dtype)" @click="(activeDType = dtype)" ripple
+                                    noBorder spacing action>
                                     {{ dtype.getDesc() }}
                                 </MDBListGroupItem>
                             </MDBListGroup>
@@ -362,8 +361,41 @@
                 id="logText" v-model="logText" />
         </MDBRow>
     </MDBTabs>
-
 </template>
+
+<style scoped>
+.vSelect {
+
+    min-width: 45vh;
+
+    /* Disabled State */
+    --vs-state-disabled-bg: #262626;
+    --vs-state-disabled-color: #262626;
+    --vs-state-disabled-controls-color: #262626;
+    --vs-state-disabled-cursor: not-allowed;
+
+    --vs-controls-color: #bbbbbb;
+    --vs-border-color: #bbbbbb;
+
+    --vs-dropdown-bg: #262626;
+    --vs-dropdown-color: #bbbbbb;
+    --vs-dropdown-option-color: #bbbbbb;
+
+    --vs-selected-bg: #bbbbbb;
+    --vs-selected-color: #bbbbbb;
+
+    --vs-search-input-color: #bbbbbb;
+
+    --vs-dropdown-option--active-bg: #bbbbbb;
+    --vs-dropdown-option--active-color: #262626;
+}
+
+.vSelectError {
+    --vs-border-color: #dc4c64;
+    --vs-controls-color: #dc4c64;
+    --vs-search-input-placeholder-color: #dc4c64;
+}
+</style>
 
 <script setup lang="ts">
 import {
@@ -378,6 +410,7 @@ import {
     MDBTooltip
 } from 'mdb-vue-ui-kit';
 import { ref } from "vue";
+import vSelect from 'vue-select'
 
 const logText = ref("Hallo :)\n");
 
@@ -524,7 +557,8 @@ let reset = false;
 let testNode = new Node('amogus', 'hee hee hee haa');
 let testMsg = new Message('YES', 0x45, false, 'amogaug');
 testNode.addMessage(testMsg);
-testMsg.addSignal(new Signal('sisigi', undefined, undefined, 'chuahumuamchuma'));
+let testsig0 = new Signal('sisigi', undefined, undefined, 'chuahumuamchuma');
+testMsg.addSignal(testsig0);
 testNode.addresses.add(0x41);
 testNode.addresses.add(0x42);
 testNode.addresses.add(0x43);
@@ -534,12 +568,19 @@ testNode.addresses.add(0x45);
 let testNode2 = new Node('gdgd', 'hee agdhee hee haa');
 let testMsg2 = new Message('ggg?', 64, true, 'agdgdagda');
 testNode2.addMessage(testMsg2);
-testMsg2.addSignal(new Signal('ds64', undefined, undefined, '0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000'));
+let testsig1 = new Signal('ds64', undefined, undefined, '0000 0000 0000 0000 0000 0000 0000 0000 0000');
+testMsg2.addSignal(testsig1);
+
+let testForm0 = new Format("chumga", undefined, 45, 64, 87, -32, "amgagu");
+let testForm1 = new Format("SGD35", undefined, 0.4, -46, 6, 614, "HHUHUHHU");
+
+testsig0.format = testForm0;
+testsig1.format = testForm1;
 
 let _dTypes: dType[] = [];
 let _activeDType: dType | null = null;
 
-let _formats: Format[] = [];
+let _formats: Format[] = [testForm0, testForm1];
 let _activeFormat: Format | null = null;
 
 let _nodes: Node[] = [testNode, testNode2];
@@ -553,8 +594,11 @@ let _nodeRangeModMin: number | null = null;
 let _nodeRangeModMax: number | null = null;
 
 function arrayDelete(array: Array<any>, item: any) {
+    if (item === null || item === undefined)
+        return
     array.splice(array.findIndex(i => i === item), 1);
 }
+
 
 export default {
     data() {
@@ -571,9 +615,10 @@ export default {
             formats: _formats,
             nodeRangeModMin: _nodeRangeModMin,
             nodeRangeModMax: _nodeRangeModMax,
-            helpStr_ID: "ID required using A-Z, 0-9, _, and no spaces and no starting with 0-9",
+            helpStr_ID: "ID must only use A-Z, 0-9, _, and no starting 0-9",
             helpStr_Addr: "Address must be either an integer or hex value (0x)",
             helpStr_Num: "Value must be a decimal number -,+,.,0-9",
+            helpStr_Rng: "Min Value ≤ Max Value",
             helpStr_Form: "Select a valid format",
         }
     },
@@ -603,7 +648,7 @@ export default {
         validNumber(num: string | number | Number | undefined | null) {
             if (num === undefined || num === null)
                 return false;
-            const reg = RegExp('^[+-]?([0-9]*[.])?[0-9]+$');
+            const reg = RegExp('^[+-]?([0-9]+|[0-9]+\.[0-9]+)$');
             return reg.test(String(num));
         },
         validRange(min: string | number | Number | undefined | null, max: string | number | Number | undefined | null) {
@@ -612,6 +657,7 @@ export default {
             return Number(min) <= Number(max);
         },
         logMsg(msg: string) {
+            console.log(msg);
             const form = new Intl.DateTimeFormat('en', { hour: 'numeric', minute: 'numeric', second: 'numeric' })
             logText.value = `${form.format(Date.now())} : ${msg}\n` + logText.value;
         },
@@ -629,24 +675,33 @@ export default {
                 this.activeNode.addresses.delete(i);
             }
         },
+        newDType() {
+            this.activeDType = new dType(`FORMAT_${this.dTypes.length}`);
+            this.dTypes.push(this.activeDType);
+            this.logMsg("New format created");
+        },
+        deleteDType() {// TODO: add a prompt or undo function
+            arrayDelete(this.dTypes, this.activeDType);
+            this.activeDType = null;
+            this.logMsg("Type deleted");
+        },
+        newFormat() {
+            this.activeFormat = new Format(`FORMAT_${this.formats.length}`);
+            this.formats.push(this.activeFormat);
+            this.logMsg("New format created");
+        },
+        deleteFormat() {// TODO: add a prompt or undo function
+            arrayDelete(this.formats, this.activeFormat);
+            this.activeFormat = null;
+            this.logMsg("Format deleted");
+        },
         selectNode(node: Node | null) {
             this.activeSig = null;
             this.activeMsg = null;
             this.activeAddr = null;
-            this.activeAddrInf = null;
+            this.activeFormat = null;
+            this.activeDType = null;
             this.activeNode = node;
-        },
-        newDType() {
-
-        },
-        deleteDType() {
-
-        },
-        newFormat() {
-
-        },
-        deleteFormat() {
-
         },
         newNode() {
             this.activeNode = new Node(`NODE_${this.nodes.length}`);
@@ -668,7 +723,7 @@ export default {
         newMessage() {
             if (this.activeNode === null)
                 return
-            this.activeMsg = new Message(`${this.activeNode.name}_MSG_${this.activeNode.messageCount()}`);
+            this.activeMsg = new Message(`${this.activeNode.name}_MSG_${this.activeNode.messageCount()}`.toUpperCase());
             this.selectMessage(this.activeMsg);
             this.activeNode.addMessage(this.activeMsg);
             this.logMsg("New message created");
@@ -688,7 +743,7 @@ export default {
         newSignal() {
             if (this.activeMsg === null)
                 return
-            this.activeSig = new Signal(`${this.activeMsg.name}_SIG_${this.activeMsg.signalCount()}`);
+            this.activeSig = new Signal(`${this.activeMsg.name}_SIG_${this.activeMsg.signalCount()}`.toUpperCase());
             this.selectSignal(this.activeSig);
             this.activeMsg.addSignal(this.activeSig);
             this.logMsg("New signal created");
