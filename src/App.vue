@@ -71,6 +71,12 @@
                                             v-bind:model-value="activeMsg?.desc"
                                             @update:model-value="val => activeMsg ? activeMsg.desc = val : false" />
                                     </MDBCol>
+                                    <MDBCol col="50">
+                                        <MDBSwitch :disabled="(activeMsg === null)"
+                                            :label="activeMsg?.incoming ? 'Incoming Message' : 'Outgoing message'"
+                                            v-bind:model-value="activeMsg?.incoming"
+                                            @update:model-value="val => activeMsg ? activeMsg.incoming = val : false" />
+                                    </MDBCol>
                                 </MDBRow>
                             </template>
                             <template #tip>
@@ -104,6 +110,10 @@
                                             label="Signal Description" rows="2" style="max-height: 5rem;"
                                             v-bind:model-value="activeSig?.desc"
                                             @update:model-value="val => activeSig ? activeSig.desc = val : false" />
+                                    </MDBCol>
+                                    <MDBCol col="50">
+                                        <MDBSwitch :disabled="(activeSig === null)"
+                                            :label="activeMsg?.incoming ? (activeSig?.setter ? `Is set by value ${activeSig.setter.gpio?.getDesc()}` : 'No Back Setter') : (activeSig?.setter ? `Sets value ${activeSig.setter.gpio?.getDesc()}` : 'No Forward Setter')" />
                                     </MDBCol>
                                 </MDBRow>
                             </template>
@@ -448,6 +458,7 @@ const tooltip3 = ref(false);
 class BaseType {
     name: string;
     desc: string | undefined;
+    aux: string;
     constructor(name: string = 'nil', desc: string | undefined = undefined) {
         this.name = name;
         this.desc = desc;
@@ -517,6 +528,7 @@ class Signal extends BaseType {
         super(name, desc);
         this.format = format;
         this.setter = setter;
+        this.aux = "format";
     }
 }
 
@@ -529,10 +541,7 @@ class Message extends BaseType {
         this.address = new Number(address);
         this.incoming = incoming;
         this.signals = [];
-    }
-    setAddress(num: string | number | Number) {
-        if (num = new Number(num))
-            this.address = num;
+        this.aux = "address";
     }
     signalCount() {
         return this.signals.length;
