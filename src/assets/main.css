@@ -50,11 +50,6 @@
     display: auto;
 }
 
-select option {
-    color: #757575;
-    background-color: #262626;
-}
-
 .MDBRow {
     margin-top: 1rem;
 }
@@ -71,4 +66,8 @@ select option {
 
 .padTop {
     margin-top: 1rem;
+}
+
+.list-group-item.active {
+    color: white;
 }

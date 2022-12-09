@@ -1,4 +1,5 @@
 <template>
+    <MDBIcon icon="mdb" iconStyle="fab" />
     <MDBTabs v-model="activeTabId5">
         <MDBTabContent>
             <MDBTabPane id="tabView" tabId="ex5-1" tag="form" novalidate @submit.prevent="checkForm">
@@ -19,7 +20,7 @@
                         <MDBListGroup class="selector" id="nodeSelector">
                             <MDBListGroupItem v-for="node in nodes" :key="node.name"
                                 v-bind:active="(activeNode === node)" @click="selectNode(node)" ripple noBorder spacing
-                                action>
+                                action class="d-flex justify-content-between align-items-center">
                                 {{ node.getDesc() }}
                             </MDBListGroupItem>
                         </MDBListGroup>
@@ -28,8 +29,13 @@
                         <MDBListGroup class="selector" id="msgSelector">
                             <MDBListGroupItem v-for="msg in activeNode?.messages" :key="msg.name"
                                 v-bind:active="(activeMsg === msg)" @click="selectMessage(msg)" ripple noBorder spacing
-                                action>
-                                {{ msg.getDesc() }}
+                                action class="d-flex justify-content-between align-items-center">
+                                <div style="width: 100%;">{{ msg.getDesc() }}</div>
+                                <MDBBadge class="badge-secondary rounded-pill">{{ msg.signals.length }}</MDBBadge>
+                                <MDBBadge :class="msg.incoming ? 'badge-success' : 'badge-info'" class=" rounded-pill">
+                                    {{ msg.incoming ? 'Incoming' : 'Outgoing' }}
+                                </MDBBadge>
+                                <!-- <MDBBadge class="badge-danger rounded-pill"></MDBBadge> -->
                             </MDBListGroupItem>
                         </MDBListGroup>
                     </MDBCol>
@@ -37,8 +43,12 @@
                         <MDBListGroup class="selector" id="signalSelector">
                             <MDBListGroupItem v-for="sig in activeMsg?.signals" :key="sig.name"
                                 v-bind:active="(activeSig === sig)" @click="selectSignal(sig)" ripple noBorder spacing
-                                action>
-                                {{ sig.getDesc() }}
+                                action class="d-flex justify-content-between align-items-center">
+                                <div style="width: 100%;">{{ sig.getDesc() }}</div>
+                                <MDBBadge :hidden="(!sig.setter)" :class="sig.setter ? 'badge-success' : ''"
+                                    class=" rounded-pill">
+                                    setter
+                                </MDBBadge>
                             </MDBListGroupItem>
                         </MDBListGroup>
                     </MDBCol>
@@ -433,7 +443,9 @@ import {
     MDBTabPane,
     MDBTextarea,
     MDBFile,
-    MDBTooltip
+    MDBTooltip,
+    MDBBadge,
+    MDBIcon
 } from 'mdb-vue-ui-kit';
 import { ref } from "vue";
 import vSelect from 'vue-select'
@@ -463,8 +475,11 @@ class BaseType {
         this.name = name;
         this.desc = desc;
     }
+    toString() {
+        return this.name;
+    }
     getDesc(limit: number = 32, withName: boolean = true) {
-        return `${withName ? (this.name ? this.name : '$nil') : ''}${this.desc ? ` : ${this.desc.slice(0, limit)}${this.desc.length > limit ? '...' : ''}` : ''}`;
+        return `${withName ? (this.name ? this.name : '$nil') : ''}${this.desc ? ` : ${this.desc.slice(0, limit)}${this.desc.length > limit ? '...' : ''}` : ''}${this.aux ? ` : ${this[this.aux]}` : ''}`;
     }
 }
 
