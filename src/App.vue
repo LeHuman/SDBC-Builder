@@ -112,7 +112,7 @@
                                             placeholder="Select a Signal Format" class="vSelect" :options="(formats)"
                                             label="name" :disabled="(activeSig === null)"
                                             v-bind:model-value="activeSig?.format"
-                                            @update:model-value="val => activeSig ? activeSig.format = val : false">
+                                            @update:model-value="updateSelectedFormat">
                                         </vSelect>
                                     </MDBCol>
                                     <MDBCol col="50">
@@ -470,7 +470,7 @@ const tooltip3 = ref(false);
 class BaseType {
     name: string;
     desc: string | undefined;
-    aux: string;
+    aux: string | undefined = undefined;
     constructor(name: string = 'nil', desc: string | undefined = undefined) {
         this.name = name;
         this.desc = desc;
@@ -479,6 +479,7 @@ class BaseType {
         return this.name;
     }
     getDesc(limit: number = 32, withName: boolean = true) {
+        // @ts-ignore: hacky aux for description
         return `${withName ? (this.name ? this.name : '$nil') : ''}${this.desc ? ` : ${this.desc.slice(0, limit)}${this.desc.length > limit ? '...' : ''}` : ''}${this.aux ? ` : ${this[this.aux]}` : ''}`;
     }
 }
@@ -671,8 +672,10 @@ export default {
 
             reset = !reset;
             if (reset)
+                // @ts-ignore:It do tho
                 event.target.classList.add("was-validated");
             else
+                // @ts-ignore:It do tho
                 event.target.classList.remove("was-validated");
         },
         validName(name: string | undefined | null) {
@@ -726,6 +729,9 @@ export default {
             arrayDelete(this.dTypes, this.activeDType);
             this.activeDType = null;
             this.logMsg("Type deleted");
+        },
+        updateSelectedFormat(val: any) {
+            this.activeSig ? this.activeSig.format = val : false;
         },
         newFormat() {
             this.activeFormat = new Format(`FORMAT_${this.formats.length}`);
