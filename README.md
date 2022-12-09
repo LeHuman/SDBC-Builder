@@ -1,6 +1,6 @@
 # SDBC Builder
 
-This template should help get you started developing with Vue 3 in Vite.
+SDBC builder made for the [IIT-SAE-ECU](https://github.com/iitmotorsports/IIT-SAE-ECU) SDBC standard.
 
 ## Recommended IDE Setup
 

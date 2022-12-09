@@ -3,7 +3,7 @@
     <MDBTabs v-model="activeTabId5">
         <MDBTabContent>
             <MDBTabPane id="tabView" tabId="ex5-1" tag="form" novalidate @submit.prevent="checkForm">
-                <p class="fs-1">SDBC Builder v2</p>
+                <p class="fs-1">SDBC Builder</p>
                 <MDBRow>
                     <MDBCol>
                         <p class="fs-4">Nodes</p>
